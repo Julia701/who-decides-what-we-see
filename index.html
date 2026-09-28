@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>谁在决定我们每天看到什么？</title>
+<style>
+:root{
+  --bg:#0b0f16; --panel:#141a24; --panel2:#1b2331; --line:#2a3446;
+  --text:#e8eef6; --muted:#93a1b3;
+  --c1:#f5b942; --c2:#38bdf8; --c3:#f472b6; --c4:#ef5350; --ok:#4ade80;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;line-height:1.7;overflow-x:hidden;min-height:100vh}
+/* 动态背景 */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.28;animation:drift 26s ease-in-out infinite alternate}
+.blob.b1{width:520px;height:520px;background:#f5b942;top:-160px;left:-120px}
+.blob.b2{width:460px;height:460px;background:#38bdf8;top:20%;right:-140px;animation-delay:-8s}
+.blob.b3{width:420px;height:420px;background:#f472b6;bottom:-160px;left:30%;animation-delay:-16s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,-50px) scale(1.15)}}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:52px 52px}
+
+/* 顶部标签栏 */
+header{position:sticky;top:0;z-index:60;background:rgba(11,15,22,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hbar{max-width:1120px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{font-size:13px;font-weight:700;letter-spacing:.04em;margin-right:10px;white-space:nowrap}
+.logo i{color:var(--c4);font-style:normal}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.tab{background:transparent;border:1px solid transparent;color:var(--muted);font-size:13.5px;padding:7px 15px;border-radius:20px;cursor:pointer;transition:.25s;font-family:inherit;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text);background:var(--panel2)}
+.tab.on{color:#0b0f16;font-weight:700;background:var(--tc,var(--c4));border-color:var(--tc,var(--c4))}
+.tab .dot{width:6px;height:6px;border-radius:50%;background:var(--tc);opacity:.9}
+.tab.on .dot{background:#0b0f16}
+/* 顶部课程署名 */
+.topstrip{text-align:center;padding:9px 14px 8px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(11,15,22,.55)}
+.topstrip .line1{font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
+.topstrip .line2{font-size:11px;letter-spacing:.1em;color:#6b798c;margin-top:2px}
+
+.prog{height:2px;background:var(--line)}
+.prog i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));transition:width .45s ease}
+
+main{max-width:1120px;margin:0 auto;padding:0 22px 90px}
+.view{display:none}
+.view.active{display:block}
+.view.active .rise{animation:rise .55s cubic-bezier(.2,.7,.3,1) both}
+.view.active .rise:nth-child(1){animation-delay:.02s}
+.view.active .rise:nth-child(2){animation-delay:.07s}
+.view.active .rise:nth-child(3){animation-delay:.12s}
+.view.active .rise:nth-child(4){animation-delay:.17s}
+.view.active .rise:nth-child(5){animation-delay:.22s}
+.view.active .rise:nth-child(6){animation-delay:.27s}
+.view.active .rise:nth-child(7){animation-delay:.32s}
+.view.active .rise:nth-child(8){animation-delay:.37s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+h1{font-size:clamp(30px,6vw,58px);line-height:1.25;font-weight:800;margin:52px 0 0;
+  background:linear-gradient(95deg,#f5b942,#38bdf8 45%,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(24px,4vw,38px);line-height:1.3;margin-bottom:10px;font-weight:800}
+h3{font-size:18px;margin:0 0 12px}
+.eyebrow{font-size:12.5px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:46px}
+.sub{font-size:clamp(15px,2.2vw,19px);color:var(--muted);margin-top:14px}
+.tagline{font-size:clamp(19px,3.4vw,34px);font-weight:800;line-height:1.5;margin:34px 0 0;padding:26px 30px;border-radius:18px;
+  background:linear-gradient(120deg,rgba(245,185,66,.13),rgba(56,189,248,.1),rgba(244,114,182,.13));border:1px solid var(--line)}
+.tagline span{color:var(--c4)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:12px}
+.p1{background:rgba(245,185,66,.16);color:var(--c1)} .p2{background:rgba(56,189,248,.16);color:var(--c2)}
+.p3{background:rgba(244,114,182,.16);color:var(--c3)} .p4{background:rgba(239,83,80,.16);color:var(--c4)}
+.sec{margin-top:38px}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sec-head h3{margin:0;font-size:19px}
+.sec-head em{font-style:normal;font-size:13px;color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hint b{color:var(--tc,var(--c1));font-weight:700}
+
+/* 卡片通用 */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover{border-color:#3a465c}
+
+/* 3D 翻卡 */
+.flipbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.flip{perspective:1300px;height:250px;cursor:pointer;outline:none}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .68s cubic-bezier(.4,.08,.2,1);transform-style:preserve-3d}
+.flip.on .flip-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:22px 24px;
+  display:flex;flex-direction:column;justify-content:center;border:1px solid var(--line);background:var(--panel);overflow:hidden}
+.face.front{background:linear-gradient(150deg,var(--panel2),var(--panel))}
+.face.back{transform:rotateY(180deg);background:linear-gradient(150deg,rgba(255,255,255,.04),var(--panel));border-color:#3d4a61}
+.face .no{position:absolute;top:14px;left:20px;font-size:34px;font-weight:800;opacity:.14;line-height:1}
+.face .flip-hint{position:absolute;bottom:12px;right:18px;font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.face h4{font-size:17.5px;margin-bottom:8px;line-height:1.45}
+.face p{font-size:14px;color:#b9c5d4;margin:0}
+.face .q{font-size:14.5px;color:var(--tc,var(--c1));font-weight:600;margin-top:10px}
+.face .say{font-size:14px;color:#cfd9e6;margin:10px 0 0;padding-left:12px;border-left:2px solid var(--tc,var(--c1))}
+.face .beat{margin-top:14px;font-size:13px;color:var(--muted)}
+.face .bold{color:var(--text);font-weight:700}
+.flip:hover .face{border-color:#48566e}
+.flip:focus-visible .face{border-color:var(--tc)}
+
+/* 开篇小卡片 */
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 18px}
+.chip{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:22px;border:1px solid var(--line);background:var(--panel);
+  cursor:pointer;font-size:14px;transition:.25s;font-family:inherit;color:var(--muted)}
+.chip:hover{color:var(--text);transform:translateY(-3px)}
+.chip.on{color:#0b0f16;font-weight:700;background:var(--cc);border-color:var(--cc)}
+.chip .av{width:20px;height:20px;border-radius:50%;background:var(--cc);color:#0b0f16;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.chip-display{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.chip-display{grid-template-columns:1fr}}
+.home-mini{display:flex;flex-direction:column;gap:8px}
+.home-mini .row{display:flex;align-items:center;gap:10px;background:var(--panel2);border-radius:9px;padding:9px 14px;font-size:14px}
+.home-mini .row b{font-size:11px;padding:1px 7px;border-radius:6px;background:rgba(255,255,255,.08);color:var(--muted);font-weight:600}
+.verdict{display:flex;flex-direction:column;justify-content:center;gap:12px}
+.verdict .vb{font-size:14.5px;color:#c9d5e3}
+.verdict .vq{font-size:17px;font-weight:700;color:var(--cc)}
+
+.quest{list-style:none;margin:26px 0 0}
+.quest li{position:relative;padding:14px 0 14px 34px;font-size:16.5px;border-bottom:1px dashed var(--line)}
+.quest li:last-child{border-bottom:none}
+.quest li::before{content:"?";position:absolute;left:6px;top:13px;color:var(--c4);font-weight:800;font-size:18px}
+.quest li b{color:var(--c4)}
+.marx{margin-top:30px;padding:20px 26px;border-left:3px solid var(--c4);background:rgba(239,83,80,.07);border-radius:0 12px 12px 0;font-size:15px;color:#cfd9e6}
+.marx b{color:var(--c4)}
+.classq{margin-top:30px;padding:18px 24px;border-radius:14px;background:var(--panel);border:1px dashed var(--line);font-size:15.5px;text-align:center;color:#c9d5e3}
+
+/* 入口卡 */
+.entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:22px}
+.entry{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--line);background:var(--panel);padding:26px 24px;cursor:pointer;text-align:left;
+  font-family:inherit;color:var(--text);transition:transform .28s,border-color .28s,box-shadow .28s}
+.entry:hover{transform:translateY(-6px)}
+.entry.e1:hover{border-color:var(--c1);box-shadow:0 16px 36px -18px var(--c1)}
+.entry.e2:hover{border-color:var(--c2);box-shadow:0 16px 36px -18px var(--c2)}
+.entry.e3:hover{border-color:var(--c3);box-shadow:0 16px 36px -18px var(--c3)}
+.entry .ic{font-size:30px}
+.entry h4{font-size:18px;margin:12px 0 6px}
+.entry.e1 h4{color:var(--c1)} .entry.e2 h4{color:var(--c2)} .entry.e3 h4{color:var(--c3)}
+.entry p{font-size:13.5px;color:var(--muted);margin:0}
+.entry .go{position:absolute;right:18px;bottom:14px;font-size:12.5px;color:var(--muted)}
+
+/* 模拟器 */
+.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.topic{background:var(--panel2);border:2px solid var(--line);border-radius:13px;padding:14px 16px;cursor:pointer;transition:.22s;position:relative;font-family:inherit;color:var(--text);text-align:left}
+.topic:hover{border-color:#4a5468;transform:translateY(-3px)}
+.topic.sel{border-color:var(--ok);background:rgba(74,222,128,.08)}
+.topic .stamp{position:absolute;top:10px;right:12px;font-size:11.5px;color:var(--ok);font-weight:800;display:none}
+.topic.sel .stamp{display:block}
+.topic h5{font-size:15.5px;margin-bottom:3px}
+.topic .meta{font-size:12.5px;color:var(--muted)}
+.topic .stars{color:var(--c1);letter-spacing:1px}
+.simbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:var(--panel2);border-radius:13px;padding:13px 18px;margin-top:14px;font-size:14px}
+.simbar button{font-family:inherit;background:var(--c1);color:#1a1200;border:none;padding:9px 24px;border-radius:9px;font-size:14.5px;font-weight:800;cursor:pointer;transition:.2s}
+.simbar button:disabled{opacity:.32;cursor:not-allowed}
+.simbar button:not(:disabled):hover{transform:translateY(-2px)}
+.simbar .reset{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 16px;font-weight:600}
+#topicResult{display:none;margin-top:16px;padding:20px 24px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+#topicResult .final{font-size:16.5px;font-weight:800;color:var(--c1);margin-top:10px}
+
+/* 算法解剖 */
+.ana{display:grid;grid-template-columns:1fr;gap:10px}
+.ana-row{display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);font-size:14.5px;opacity:0;transform:translateX(-14px);transition:.4s}
+.ana-row.show{opacity:1;transform:none}
+.ana-row .k{font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:7px;flex-shrink:0}
+.ana-row.up .k{background:rgba(74,222,128,.16);color:var(--ok)}
+.ana-row.down .k{background:rgba(239,83,80,.16);color:var(--c4)}
+.ana-row .sc{margin-left:auto;font-size:12.5px;color:var(--muted);flex-shrink:0}
+.ana-row.up .sc{color:var(--ok)} .ana-row.down .sc{color:var(--c4)}
+.ana-verdict{margin-top:14px;padding:16px 20px;border-radius:12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.35);font-size:14.5px;display:none}
+.ana-verdict.show{display:block;animation:rise .5s both}
+.btn{font-family:inherit;background:var(--c2);color:#00161d;border:none;padding:11px 26px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;transition:.2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600;font-size:13.5px;padding:9px 18px}
+
+/* 调参台 */
+.bench{display:grid;grid-template-columns:290px 1fr;gap:22px}
+@media(max-width:820px){.bench{grid-template-columns:1fr}}
+.ctrls{background:var(--panel2);border-radius:15px;padding:20px;border:1px solid var(--line)}
+.ctrl{margin-bottom:18px}
+.ctrl label{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px;color:#c2cede}
+.ctrl label b{color:var(--c2)}
+.ctrl input[type=range]{width:100%;accent-color:var(--c2)}
+.feed{display:flex;flex-direction:column;gap:7px}
+.fitem{display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 15px;font-size:14px}
+.fitem .rank{width:21px;height:21px;border-radius:50%;background:#333c4d;display:flex;align-items:center;justify-content:center;font-size:11.5px;flex-shrink:0}
+.fitem .sv{margin-left:auto;font-size:11.5px;flex-shrink:0;color:var(--c4)}
+.fitem .sv.hi{color:var(--ok)}
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.kpi{background:var(--panel2);border-radius:11px;padding:10px 16px;font-size:12.5px;color:var(--muted);flex:1;min-width:140px}
+.kpi b{display:block;font-size:19px;color:var(--text)}
+.msg{margin-top:14px;padding:14px 18px;border-radius:11px;font-size:14px;display:none}
+.msg.show{display:block;animation:rise .4s both}
+.msg.warn{background:rgba(239,83,80,.1);border:1px solid rgba(239,83,80,.4);color:#f7b7b3}
+.msg.biz{background:rgba(245,185,66,.09);border:1px solid rgba(245,185,66,.42);color:#f3d491}
+
+/* 框架切换 */
+.framegrid{display:grid;grid-template-columns:1.08fr .92fr;gap:22px}
+@media(max-width:820px){.framegrid{grid-template-columns:1fr}}
+.tabs2{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 14px}
+.ftab{font-family:inherit;padding:8px 15px;border-radius:18px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:13.5px;cursor:pointer;transition:.22s}
+.ftab:hover{color:var(--text)}
+.ftab.on{background:var(--c3);border-color:var(--c3);color:#2a0d1d;font-weight:800}
+.fact .base{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.fact h4{font-size:18px;margin:4px 0 10px;line-height:1.5}
+.fact h4 span{display:block;font-size:12px;font-weight:700;color:var(--c3);margin-bottom:6px}
+.fact .flavor{font-size:13.5px;color:#adbaca}
+.comments{background:#05070b;border-radius:20px;padding:16px 14px;border:5px solid #171d27;min-height:330px}
+.comments .cht{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:12px}
+.cmt{display:flex;gap:10px;margin-bottom:12px;animation:pop .35s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#0b0f16;font-weight:800}
+.cmt .bub{background:var(--panel2);border-radius:2px 12px 12px 12px;padding:7px 12px;font-size:13px}
+.cmt .bub .who{font-size:11px;color:var(--muted)}
+.poll{margin-top:26px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
+.pollopt{padding:14px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;text-align:center;font-size:14px;transition:.22s;font-family:inherit;color:var(--text)}
+.pollopt:hover{border-color:var(--c3);transform:translateY(-3px)}
+.pollopt.voted{border-color:var(--c3);background:rgba(244,114,182,.12)}
+.pollopt .pct{display:none;font-size:21px;font-weight:800;color:var(--c3);margin-top:5px}
+.pollopt.voted .pct{display:block}
+.poll-note{display:none;margin-top:14px;font-size:13.5px;color:#e9b6d3}
+
+/* 汇合 */
+.chain{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:820px){.chain{grid-template-columns:1fr}}
+.cbox{background:var(--panel2);border-radius:14px;border-top:4px solid var(--cc);padding:20px 22px;cursor:pointer;transition:.25s;font-family:inherit;color:var(--text);text-align:left}
+.cbox:hover{transform:translateY(-5px)}
+.cbox h4{color:var(--cc);font-size:16.5px;margin-bottom:6px}
+.cbox p{font-size:13px;color:var(--muted);margin:0}
+.cbox .more{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13.5px;color:#c3cfdd}
+.cbox.open .more{display:block;animation:rise .35s both}
+.answer{margin-top:22px;padding:26px 30px;border-radius:16px;background:linear-gradient(120deg,rgba(245,185,66,.12),rgba(56,189,248,.1),rgba(244,114,182,.12));border:1px solid var(--line)}
+.answer h4{font-size:20px;margin-bottom:10px}
+.answer .hl{color:var(--c4);font-weight:800}
+.methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.face .mt{font-size:16.5px;font-weight:800;color:var(--c4)}
+.finalq{list-style:none;display:grid;gap:12px;margin-top:18px}
+.finalq li{padding:18px 22px;background:var(--panel);border:1px solid var(--line);border-radius:13px;font-size:15.5px}
+.finalq li b{color:var(--c4)}
+.foot{margin-top:46px;text-align:center;color:#5d6a7c;font-size:12.5px}
+.foot .line{display:block;margin-bottom:14px;font-size:15px;font-style:italic;color:var(--muted)}
+
+/* 折叠面板 */
+.fold{margin-top:18px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.fold>button{width:100%;text-align:left;font-family:inherit;background:transparent;border:none;color:var(--text);font-size:15px;font-weight:700;
+  padding:16px 22px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:.2s}
+.fold>button:hover{background:var(--panel2)}
+.fold>button .ar{margin-left:auto;transition:.3s;color:var(--muted)}
+.fold.open>button .ar{transform:rotate(90deg)}
+.fold .body{display:none;padding:0 22px 20px}
+.fold.open .body{display:block;animation:rise .35s both}
+.fold.theory{border-color:rgba(239,83,80,.4)}
+.fold.theory>button{color:var(--c4)}
+.fold .body p{font-size:14px;color:#bfcbda;margin:10px 0}
+.fold .body p b{color:var(--text)}
+.fold .body .k{color:var(--c4);font-weight:700}
+.nextbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="bg"><div class="grid"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<div class="topstrip">
+  <div class="line1">中国传媒大学 · 2026《马克思主义与社会科学方法论》课程作业</div>
+  <div class="line2">小组成员：蔡琳 / 朱雅婕 / 艾先会 / 熊宇文 / 纵琪</div>
+</div>
+
+<header>
+  <div class="hbar">
+    <div class="logo"><i>■</i> 谁在决定我们每天看到什么？</div>
+    <nav class="tabs">
+      <button class="tab on" data-go="home" style="--tc:#f5b942"><span class="dot"></span>开篇</button>
+      <button class="tab" data-go="publish" style="--tc:#f5b942"><span class="dot"></span>出版</button>
+      <button class="tab" data-go="ict" style="--tc:#38bdf8"><span class="dot"></span>信息通信</button>
+      <button class="tab" data-go="media" style="--tc:#f472b6"><span class="dot"></span>新闻与传播</button>
+      <button class="tab" data-go="merge" style="--tc:#ef5350"><span class="dot"></span>汇合与方法论</button>
+    </nav>
+  </div>
+  <div class="prog"><i id="progBar"></i></div>
+</header>
+
+<main>
+
+<!-- ==================== 开篇 ==================== -->
+<section class="view active" id="home">
+  <p class="eyebrow rise">马克思主义与科学方法论 · 小组作业</p>
+  <h1 class="rise">谁在决定我们每天看到什么？</h1>
+
+  <div class="tagline rise">我们坐在同一间教室，上着同一门课，<br>却在看<span>五个完全不同的信息世界</span>。</div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>点一个同学，看看他的首页</h3>
+      <em class="hint">👆 五位同学同一天早上的首页 —— 没有两个人的推荐是重合的</em>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="chip-display">
+      <div class="home-mini card" id="miniFeed" style="--cc:#f5b942"></div>
+      <div class="card verdict" id="miniVerdict" style="--cc:#f5b942"></div>
+    </div>
+  </div>
+
+  <ul class="quest rise">
+    <li>这些内容，是谁挑出来的？——不是我，也不完全是"平台"。</li>
+    <li>为什么我的首页里，几乎没有你首页里的东西？</li>
+    <li>更进一步：为什么有些重要的内容，我们<b>谁的首页上都没有</b>？</li>
+  </ul>
+
+  <div class="marx rise">
+    马克思：<b>"不是人们的意识决定人们的存在，相反，是人们的社会存在决定人们的意识。"</b><br>
+    我们以为自己在"自由地浏览"，但那个可供浏览的世界，是被一整套社会机制预先生产、筛选和分发出来的。
+  </div>
+
+  <div class="classq rise">▍ 请拿出手机，打开你常用的首页，和同桌比一比：你们的第一个视频一样吗？</div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>内容走什么样的路，才会出现在你面前？</h3>
+      <em class="hint">三个专业，三个入口 —— 每个出口都通向下一双眼睛</em>
+    </div>
+    <div class="entries">
+      <button class="entry e1" data-go="publish">
+        <div class="ic">📚</div>
+        <h4>出版：什么内容能被生产？</h4>
+        <p>社会需要、市场需求与出版资源，如何共同影响选题？</p>
+        <span class="go">进入 →</span>
+      </button>
+      <button class="entry e2" data-go="ict">
+        <div class="ic">📡</div>
+        <h4>信息通信：什么内容更容易被分发？</h4>
+        <p>推荐系统把什么当作"有价值"的信号？</p>
+        <span class="go">进入 →</span>
+      </button>
+      <button class="entry e3" data-go="media">
+        <div class="ic">📰</div>
+        <h4>新闻与传播：被看见等于被理解吗？</h4>
+        <p>同一内容换个框架，会引导我们关注什么、忽略什么？</p>
+        <span class="go">进入 →</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 出版 ==================== -->
+<section class="view" id="publish" style="--tc:#f5b942">
+  <p class="eyebrow rise">入口一 · 出版</p>
+  <h2 class="rise">什么内容能够被生产？</h2>
+  <p class="sub rise">社会需要、市场需求与出版资源，如何共同决定"什么知识能够成为出版物"。</p>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎴 选题会上的三次沉默</h3>
+      <em class="hint">👆 点击任意一张卡片，翻开它会后的现场</em>
+    </div>
+    <div class="flipbox" id="silenceCards"></div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎴 三道筛子</h3>
+      <em class="hint">👆 一本书走到读者面前，要先通过这三关</em>
+    </div>
+    <div class="flipbox" id="filterCards"></div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎮 你是编辑：选题会模拟器</h3>
+      <em class="hint">规则：<b>3 个书号</b> + <b>120 编辑工时</b>，选满 3 个开会</em>
+    </div>
+    <div class="topics" id="topics"></div>
+    <div class="simbar">
+      <div>书号 <b id="quotaLeft" style="color:var(--c1)">3</b>/3 　工时 <b id="hoursLeft" style="color:var(--c1)">120</b>/120</div>
+      <button id="topicConfirm" disabled>召开定稿会</button>
+      <button class="reset" id="topicReset">重置</button>
+    </div>
+    <div id="topicResult">
+      <p class="abandon" id="abandonList" style="font-size:14px;color:#b8c4d3"></p>
+      <p class="final" id="topicFinal"></p>
+    </div>
+  </div>
+
+  <div class="fold theory rise">
+    <button>🔎 马克思主义方法论透视<span class="ar">›</span></button>
+    <div class="body">
+      <p><span class="k">文化产品的二重性</span>　文化商品同时具有社会价值（使用价值）和商品属性（交换价值）。当二者冲突时，市场的逻辑天然偏向后者。</p>
+      <p><span class="k">精神生产受物质生产条件制约</span>　编辑不是不想做好书，而是在选题会那张桌子上，摆着成本、周期和考核指标。</p>
+      <p><span class="k">实践的观点</span>　出版决策不是"个人趣味"，而是一定社会条件下的实践活动。</p>
+    </div>
+  </div>
+
+  <div class="fold rise">
+    <button>⚖️ 本视角的解释边界<span class="ar">›</span></button>
+    <div class="body">
+      <p>出版视角解释了"什么内容能进入通道"，但它回答不了：<b>内容被生产出来之后，为什么有的传播开来、有的无人问津？</b></p>
+    </div>
+  </div>
+
+  <div class="nextbar">
+    <span class="hint">内容离开出版社之后发生的事情，需要下一双眼睛。</span>
+    <button class="btn" data-go="ict">📡 进入信息通信 →</button>
+  </div>
+</section>
+
+<!-- ==================== 信息通信 ==================== -->
+<section class="view" id="ict" style="--tc:#38bdf8">
+  <p class="eyebrow rise">入口二 · 信息通信</p>
+  <h2 class="rise">什么内容更容易被分发？</h2>
+  <p class="sub rise">推荐系统把什么当作"有价值"的信号？不同的目标，会让哪些内容获得优势？</p>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🔬 一次推荐的解剖</h3>
+      <em class="hint">👆 连续点击按钮，看系统在 47 秒里「看见」了什么</em>
+    </div>
+    <div class="ana" id="anaBox"></div>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn" id="anaBtn">提交一次浏览 →</button>
+      <button class="btn ghost" id="anaReset">重来</button>
+    </div>
+    <div class="ana-verdict" id="anaVerdict">
+      <b>系统不知道你划走的原因</b> —— 也许你在地铁上没戴耳机。它只知道：数据说你"不喜欢"。
+    </div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎮 调参实验台：亲手做一个推荐算法</h3>
+      <em class="hint">拖动滑块分配权重，同一个内容池会被排出完全不同的世界</em>
+    </div>
+    <div class="bench">
+      <div class="ctrls">
+        <div class="ctrl"><label>点击率权重 <b id="w1v">6</b></label><input type="range" id="w1" min="0" max="10" value="6"></div>
+        <div class="ctrl"><label>停留时长权重 <b id="w2v">5</b></label><input type="range" id="w2" min="0" max="10" value="5"></div>
+        <div class="ctrl"><label>内容多样性权重 <b id="w3v">2</b></label><input type="range" id="w3" min="0" max="10" value="2"></div>
+        <button class="btn" id="genFeed" style="width:100%">生成首页</button>
+      </div>
+      <div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">📋 当前首页（按算法得分排序，前 6 条）</div>
+        <div class="feed" id="feed"></div>
+        <div class="kpis">
+          <div class="kpi">首页平均社会价值<b id="kpiSv">—</b></div>
+          <div class="kpi">模拟平台日活<b id="kpiDa">—</b></div>
+          <div class="kpi">模拟广告收入<b id="kpiRev">—</b></div>
+        </div>
+        <div class="msg warn" id="cocoonMsg">⚠️ 你刚刚生产了一个信息茧房：争议与情绪内容垄断了首页 —— 而你并没有做错任何"技术决策"，只是把滑块拨向了商业上最理性的位置。</div>
+        <div class="msg biz" id="boardMsg">📉 首页很健康，但董事会不满意了：日活 -38%，广告收入 -52%。这不是算法能不能做的问题，而是<b>谁的目标函数说了算</b>的问题。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fold theory rise">
+    <button>🔎 马克思主义方法论透视<span class="ar">›</span></button>
+    <div class="body">
+      <p><span class="k">技术与社会的关系</span>　技术目标不是凭空出现的，它由平台的经营方式、数据来源和评价制度共同塑造。分析技术，就要分析技术背后的社会关系。</p>
+      <p><span class="k">数据作为生产资料</span>　谁占有数据、谁定义指标，谁就掌握了"可见性"的分配权。</p>
+      <p><span class="k">透过现象看本质</span>　界面呈现为"个性化服务"，运行逻辑则是注意力的批量采购与转售。</p>
+    </div>
+  </div>
+
+  <div class="fold rise">
+    <button>⚖️ 本视角的解释边界<span class="ar">›</span></button>
+    <div class="body">
+      <p>算法视角解释了"分发的不均"，但回答不了：<b>同样的曝光，为什么有人被说服、有人被激怒、有人无感？</b>用户不是待优化参数，而是会思考的人。</p>
+    </div>
+  </div>
+
+  <div class="nextbar">
+    <span class="hint">理解"内容如何被接受"，需要第三双眼睛。</span>
+    <button class="btn" data-go="media" style="background:var(--c3);color:#2a0d1d">📰 进入新闻与传播 →</button>
+  </div>
+</section>
+
+<!-- ==================== 新闻与传播 ==================== -->
+<section class="view" id="media" style="--tc:#f472b6">
+  <p class="eyebrow rise">入口三 · 新闻与传播</p>
+  <h2 class="rise">被看见，等于被理解吗？</h2>
+  <p class="sub rise">同一内容经过不同框架呈现，会引导受众关注什么、忽略什么？</p>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>👓 换一副眼镜：框架切换实验</h3>
+      <em class="hint">👆 同一份事实底稿，四个标题 —— 右边的评论区会跟着变</em>
+    </div>
+    <div class="tabs2">
+      <button class="ftab on" data-f="0">冲突框架</button>
+      <button class="ftab" data-f="1">人情框架</button>
+      <button class="ftab" data-f="2">制度框架</button>
+      <button class="ftab" data-f="3">数字框架</button>
+    </div>
+    <div class="framegrid">
+      <div class="card fact">
+        <p class="base">【事实底稿 · 示意】某市调研：外卖骑手中 62% 日工作超过 10 小时，其中约半数没有完整社保。</p>
+        <h4 id="fHead"><span>标题 A · 冲突框架</span>《外卖平台被指压榨骑手，双方各执一词》</h4>
+        <p class="flavor" id="fLead">读者关注：谁对谁错？</p>
+        <p class="hint" style="margin-top:16px">四个标题都是"真实的"，但它们让你看向了四个不同的方向 —— <b>并且，都不完整。</b></p>
+      </div>
+      <div class="comments">
+        <div class="cht">— 评论区 —</div>
+        <div id="cmtBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec rise">
+    <div class="card poll">
+      <h3>🗳 投票：骑手超时劳动，最应该由谁负责？</h3>
+      <p class="hint">先在心中默选，再点下面的选项 —— 观察你的答案是否被你最后看的框架影响了。</p>
+      <div class="opts">
+        <button class="pollopt" data-v="0">外卖平台<span class="pct">41%</span></button>
+        <button class="pollopt" data-v="1">制度与监管<span class="pct">33%</span></button>
+        <button class="pollopt" data-v="2">骑手个人选择<span class="pct">9%</span></button>
+        <button class="pollopt" data-v="3">说不清 / 时代使然<span class="pct">17%</span></button>
+      </div>
+      <p class="poll-note" id="pollNote">💡 比例是虚构的示意数据，但它对应一个真实发现：<b>受众的责任归因，显著受其接触到的新闻框架影响。</b></p>
+    </div>
+  </div>
+
+  <div class="fold theory rise">
+    <button>🔎 马克思主义方法论透视<span class="ar">›</span></button>
+    <div class="body">
+      <p><span class="k">意识形态的日常化</span>　意识形态不总是宏大声明，它藏在"理所当然"的叙事方式里。追问"这个框架让谁受益、让谁隐形"，就是意识形态分析的入口。</p>
+      <p><span class="k">受众的能动性</span>　马克思主义不把人看作被动的接收器。受众带着自己的阶级位置与生活经验去解读内容。</p>
+      <p><span class="k">传播即权力</span>　传播不仅分配注意力，也参与定义"什么算问题""谁该负责"。</p>
+    </div>
+  </div>
+
+  <div class="fold rise">
+    <button>⚖️ 本视角的解释边界<span class="ar">›</span></button>
+    <div class="body">
+      <p>传播视角解释了"理解如何被引导"，但无法独立回答：这些框架化的内容最初是<b>谁</b>、在什么条件下生产出来的？又凭什么被推到我们面前？</p>
+    </div>
+  </div>
+
+  <div class="nextbar">
+    <span class="hint">三个视角，缺了哪一个都不完整。</span>
+    <button class="btn" data-go="merge" style="background:var(--c4);color:#fff">🔀 三个镜头叠在一起 →</button>
+  </div>
+</section>
+
+<!-- ==================== 汇合与方法论 ==================== -->
+<section class="view" id="merge" style="--tc:#ef5350">
+  <p class="eyebrow rise">汇合 · 落点</p>
+  <h2 class="rise">三个镜头，一条链条</h2>
+  <p class="sub rise">点击每个环节，展开它在链条上扮演的角色。</p>
+
+  <div class="sec rise">
+    <div class="chain">
+      <button class="cbox" style="--cc:#f5b942">
+        <h4>📚 出版</h4>
+        <p>什么内容被生产？</p>
+        <div class="more">社会需要 × 市场需求 × 出版资源 —— 决定内容是否<b>存在</b>。</div>
+      </button>
+      <button class="cbox" style="--cc:#38bdf8">
+        <h4>📡 信息通信</h4>
+        <p>什么内容被分发？</p>
+        <div class="more">目标函数 × 数据 × KPI —— 决定内容是否被<b>放大</b>。</div>
+      </button>
+      <button class="cbox" style="--cc:#f472b6">
+        <h4>📰 新闻与传播</h4>
+        <p>什么内容被理解？</p>
+        <div class="more">框架 × 情绪 × 受众能动性 —— 决定内容以什么面目被<b>理解</b>。</div>
+      </button>
+    </div>
+
+    <div class="answer">
+      <h4>我们的首页不是"推荐"出来的，是"生产"出来的。</h4>
+      <p style="font-size:15px;color:#cbd6e4">出版决定内容是否存在，算法决定内容是否被放大，框架决定内容以什么面目被理解。三个环节环环相扣，任何单一视角看到的都只是局部。</p>
+      <hr style="border:none;border-top:1px dashed var(--line);margin:18px 0">
+      <p style="font-size:15px;color:#cbd6e4">知识的社会价值，如何转化为平台上的可见性？<br>
+      答案是：<b>二者之间没有一个自动转换的通道。</b>分配可见性的主要逻辑是<span class="hl">注意力的商业变现</span>，而不是<span class="hl">知识的社会价值</span>。</p>
+      <p style="font-size:15px;color:#cbd6e4;margin-top:12px">这就是为什么：值得被了解的内容，不一定获得更多关注 —— 不是它不够好，而是它在这套尺子下"分数不高"。</p>
+    </div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎴 马克思主义怎么看这个问题</h3>
+      <em class="hint">👆 点击卡片翻开它的现实对应</em>
+    </div>
+    <div class="flipbox" id="methodCards"></div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head"><h3>给你的三个问题</h3><em class="hint">离开教室后还能想的</em></div>
+    <ul class="finalq">
+      <li>① 打开你的首页问一句：这些内容里，有多少是"我想看的"，有多少是"被算准了我会上瘾的"？</li>
+      <li>② 上一次你主动搜索一条"重要但不好看"的内容，是什么时候？</li>
+      <li>③ 作为未来的出版人、工程师、传播者 —— <b>你想让谁被看见？</b></li>
+    </ul>
+  </div>
+
+  <div class="foot rise">
+    <span class="line">"问题不会在刷屏中消失，正如它不会在刷屏中被看见。"</span>
+    《马克思主义与科学方法论》课程作业 · 出版 × 信息通信 × 新闻与传播 · 小组作品
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ================= 路由 ================= */
+var VIEWS=['home','publish','ict','media','merge'];
+function go(name,silent){
+  if(VIEWS.indexOf(name)<0)name='home';
+  var secs=document.querySelectorAll('.view');
+  for(var i=0;i<secs.length;i++)secs[i].classList.toggle('active',secs[i].id===name);
+  var tabs=document.querySelectorAll('.tab');
+  for(var j=0;j<tabs.length;j++)tabs[j].classList.toggle('on',tabs[j].getAttribute('data-go')===name);
+  var idx=VIEWS.indexOf(name);
+  document.getElementById('progBar').style.width=((idx+1)/VIEWS.length*100)+'%';
+  if(!silent&&location.hash.slice(1)!==name)location.hash=name;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.addEventListener('click',function(e){
+  var el=e.target.closest?e.target.closest('[data-go]'):null;
+  if(el){go(el.getAttribute('data-go'));}
+});
+window.addEventListener('hashchange',function(){go(location.hash.slice(1),true);});
+
+/* ================= 开篇：五个同学 ================= */
+var classmate=[
+ {n:'同学A',c:'#f5b942',app:'抖音',
+  homes:[['1','沉浸式化妆vlog'],['2','游戏高光集锦'],['3','猫猫踩奶']],
+  why:'她每天通勤 40 分钟，把这段时间全交给了短视频 —— 算法精准占满了这段"垃圾时间"。'},
+ {n:'同学B',c:'#38bdf8',app:'快手',
+  homes:[['1','工地生活记录'],['2','家乡方言短剧'],['3','卡车司机美食']],
+  why:'他的关注列表里没有一条明星新闻。算法学到的不是"他喜欢什么"，而是"他属于谁"。'},
+ {n:'同学C',c:'#f472b6',app:'B站',
+  homes:[['1','20分钟历史解说'],['2','考研经验分享'],['3','硬核科普长视频']],
+  why:'算法发现他"完播率"极高，于是把最长的内容推给他 —— 平台愿意为留住他付更高的流量价。'},
+ {n:'同学D',c:'#fb7185',app:'小红书',
+  homes:[['1','租房避坑攻略'],['2','秋招offer经验'],['3','一人食晚餐']],
+  why:'她正在经历人生过渡期。算法的判断甚至早于她自己的表达 —— 焦虑本身就是可计算的流量。'},
+ {n:'同学E',c:'#a78bfa',app:'微博',
+  homes:[['1','热搜：明星官宣'],['2','社会新闻吵架现场'],['3','体育赛事集锦']],
+  why:'愤怒的内容在他首页停留最久。这不是他"脾气差"，而是他的停留被测量、被放大、被再生产。'}];
+var chipsBox=document.getElementById('chips');
+classmate.forEach(function(m,i){
+  var b=document.createElement('button');
+  b.className='chip'+(i===0?' on':'');b.style.setProperty('--cc',m.c);b.setAttribute('data-i',i);
+  b.innerHTML='<span class="av">'+m.n.slice(-1)+'</span>'+m.n+' · '+m.app;
+  chipsBox.appendChild(b);
+});
+function showMate(i){
+  var m=classmate[i];
+  document.querySelectorAll('.chip').forEach(function(c,j){c.classList.toggle('on',j===i)});
+  document.getElementById('miniFeed').style.setProperty('--cc',m.c);
+  document.getElementById('miniVerdict').style.setProperty('--cc',m.c);
+  document.getElementById('miniFeed').innerHTML='<div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">'+m.app+' · 今日首页</div>'+
+    m.homes.map(function(h){return '<div class="row"><b>'+h[0]+'</b>'+h[1]+'</div>'}).join('');
+  document.getElementById('miniVerdict').innerHTML='<div class="vq">他看到的，和你看到的，没有任何一条重合。</div><div class="vb">'+m.why+'</div>';
+}
+chipsBox.addEventListener('click',function(e){
+  var c=e.target.closest('.chip');if(c)showMate(+c.getAttribute('data-i'));
+});
+showMate(0);
+
+/* ================= 通用翻卡 ================= */
+function buildFlips(box,cards){
+  cards.forEach(function(c){
+    var d=document.createElement('div');
+    d.className='flip';d.setAttribute('tabindex','0');
+    d.innerHTML='<div class="flip-inner">'+
+      '<div class="face front"><span class="no">'+c.no+'</span><h4>'+c.h+'</h4><p class="q">'+c.q+'</p><span class="flip-hint">点击翻转 ↻</span></div>'+
+      '<div class="face back"><h4>'+c.bh+'</h4>'+c.body+'</div>'+
+      '</div>';
+    d.addEventListener('click',function(){d.classList.toggle('on')});
+    d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();d.classList.toggle('on')}});
+    box.appendChild(d);
+  });
+}
+
+/* 出版：三次沉默 */
+buildFlips(document.getElementById('silenceCards'),[
+ {no:'A',h:'《县域老龄化调查报告》',q:'两年田野调查，访谈 300 位老人。编辑问：「这本书有社会价值吗？」',
+  bh:'第一次沉默',
+  body:'<p class="say">主编：「有社会价值。」</p><p class="say">发行部主任：「预估首印 2000 册，退货率可能 40%。」</p><p class="beat">会场上没人说话 —— <span class="bold">社会价值与销售预期，在这里第一次正面相撞。</span></p>'},
+ {no:'B',h:'《顶流明星瘦身食谱》',q:'三个月可上市，渠道已预定加印。编辑问：「这本书需要讨论吗？」',
+  bh:'第二次沉默',
+  body:'<p class="say">发行部主任眼睛一亮：「这本书不用讨论了吧？」</p><p class="beat">主编没有回答。<span class="bold">不需要讨论的选题，恰恰说明"能卖"已经成为默认标准。</span></p>'},
+ {no:'C',h:'青年学者的当代史书稿',q:'学术质量过硬，作者没名气，需占用一位编辑两年时间。',
+  bh:'第三次沉默',
+  body:'<p class="say">「书是好书，但我们真的没有人手。」</p><p class="beat">最终书号给了 D：《ChatGPT 赚钱指南》。<span class="bold">决定权不在"内容好不好"，而在资源账本上。</span></p>'}
+]);
+/* 出版：三道筛子 */
+buildFlips(document.getElementById('filterCards'),[
+ {no:'01',h:'社会需要',q:'出版导向、政策边界、机构定位 —— 哪些话题可以进入讨论？',
+  bh:'第一道筛子前，是"能说"',
+  body:'<p class="say">决定谁有权进入公共讨论。</p><p class="beat"><span class="bold">它筛选的是"合法性"</span>，不是质量。</p>'},
+ {no:'02',h:'市场需求',q:'销售预测、退货率、渠道偏好 —— 哪些话题值得投入？',
+  bh:'这里藏着最关键的偷换',
+  body:'<p class="say">「市场需要」衡量的不是社会需要，而是<span class="bold">"能被购买的需要"</span>。</p><p class="beat">没有支付能力的人，在账面上等于"没有需求"。</p>'},
+ {no:'03',h:'出版资源',q:'编辑人手、营销预算、印制成本 —— 谁来完成它？',
+  bh:'质量需要时间，时间需要成本',
+  body:'<p class="say">一个需要三年打磨的选题，和一个三个月上市的选题，<span class="bold">在资源竞争中的起点完全不同</span>。</p><p class="beat">"好书出不来"往往不是价值判断，而是排期问题。</p>'},
+]);
+/* 方法论卡（在 merge 视图，构建时机不影响） */
+buildFlips(document.getElementById('methodCards'),[
+ {no:'01',h:'社会存在决定社会意识',q:'你的"个人口味"，是从哪里来的？',
+  bh:'现实对应',
+  body:'<p class="say">闲暇时间、消费能力、职业焦虑，都先于你而存在，并被算法精确捕捉。</p><p class="beat"><span class="bold">你的口味里，写着你的社会位置。</span></p>'},
+ {no:'02',h:'普遍联系与整体性方法',q:'为什么只骂算法是不完整的？',
+  bh:'现实对应',
+  body:'<p class="say">只骂算法，看不见出版端的沉默；只怪编辑，看不见分发端的挤压。</p><p class="beat"><span class="bold">系统的病，要在系统中找。</span></p>'},
+ {no:'03',h:'矛盾分析法',q:'贯穿三个环节的基本矛盾是什么？',
+  bh:'现实对应',
+  body:'<p class="say">内容的社会价值与商业价值的矛盾：出版端表现为社会效益与销量之争，算法端表现为收获与时长之争，传播端表现为公共知情与情绪流量之争。</p><p class="beat"><span class="bold">抓住主要矛盾，三个专业的现象才能被统一理解。</span></p>'},
+ {no:'04',h:'实践的观点',q:'骂"把关人变坏"为什么没有用？',
+  bh:'现实对应',
+  body:'<p class="say">要问：<span class="bold">是什么样的条件让"变坏"成为理性的选择</span>。</p><p class="beat">编辑的选题、工程师的代码、运营的标题，都是具体历史条件下的实践活动。</p>'},
+ {no:'05',h:'人民立场',q:'文化生产为了谁？',
+  bh:'现实对应',
+  body:'<p class="say">当"值得被了解的内容"系统性输给"更容易变现的内容"，受损的不是某个机构，而是<span class="bold">公众的知情质量</span>与社会的公共讨论。</p>'},
+]);
+
+/* ================= 出版：选题模拟器 ================= */
+var topics=[
+ {t:'《县域老龄化调查报告》',d:'两年田野调查，访谈 300 位老人',stars:5,h:60,note:'首印 2000 册，退货率 40%'},
+ {t:'《顶流明星瘦身食谱》',d:'三个月上市，渠道预定加印',stars:1,h:30,note:'发行部预测：稳赚'},
+ {t:'青年学者当代史书稿',d:'质量过硬，需占用编辑两年',stars:5,h:100,note:'作者无名气，营销难做'},
+ {t:'《ChatGPT 赚钱指南》',d:'蹭热点，生命周期约 6 个月',stars:2,h:25,note:'"预计能卖"的那本'},
+ {t:'《乡村教师口述史》',d:'抢救性记录，错过就没了',stars:5,h:70,note:'首印 1500 册，靠补贴出版'},
+ {t:'《宠物博主运营手册》',d:'实用畅销品，退货率低',stars:2,h:20,note:'编辑只需 2 个月'}];
+var QUOTA=3,HOURS=120,sel={};
+var tbox=document.getElementById('topics');
+topics.forEach(function(x,i){
+  var b=document.createElement('button');b.className='topic';b.setAttribute('data-i',i);
+  b.innerHTML='<span class="stamp">✓ 已列入</span><h5>'+x.t+'</h5><div class="meta">'+x.d+'</div>'+
+    '<div class="meta">社会价值 <span class="stars">'+'★'.repeat(x.stars)+'☆'.repeat(5-x.stars)+'</span> ｜ 工时 '+x.h+'h</div>'+
+    '<div class="meta">'+x.note+'</div>';
+  tbox.appendChild(b);
+});
+function usedHours(){var s=0;for(var k in sel)s+=topics[k].h;return s;}
+function updateSim(){
+  var n=Object.keys(sel).length;
+  document.getElementById('quotaLeft').textContent=QUOTA-n;
+  document.getElementById('hoursLeft').textContent=HOURS-usedHours();
+  document.getElementById('topicConfirm').disabled=(n!==QUOTA);
+}
+tbox.addEventListener('click',function(e){
+  var b=e.target.closest('.topic');if(!b)return;
+  var i=+b.getAttribute('data-i'),x=topics[i];
+  if(b.classList.contains('sel')){delete sel[i];b.classList.remove('sel');}
+  else{
+    if(Object.keys(sel).length>=QUOTA){toast('书号不够了 —— 你只有 3 个书号。');return;}
+    if(usedHours()+x.h>HOURS){toast('编辑工时不够了："这本书不错，但我们真的没有人手。"');return;}
+    sel[i]=1;b.classList.add('sel');
+  }
+  updateSim();
+});
+function toast(msg){
+  var t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;left:50%;bottom:44px;transform:translateX(-50%);background:#ef5350;color:#fff;padding:12px 22px;border-radius:11px;font-size:14px;z-index:200;box-shadow:0 14px 34px -12px #000;max-width:88vw;text-align:center';
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.transition='.4s';t.style.opacity='0';setTimeout(function(){t.remove()},420)},1800);
+}
+document.getElementById('topicConfirm').addEventListener('click',function(){
+  var ab=[];topics.forEach(function(x,i){if(!sel[i])ab.push(x.t.replace(/[《》]/g,''))});
+  document.getElementById('abandonList').innerHTML='你放弃了：'+ab.join(' · ');
+  document.getElementById('topicFinal').innerHTML='你放弃的每一个选题，都是某个群体失去一次被看见的机会。'+
+    '<div style="font-size:13.5px;font-weight:400;color:var(--muted);margin-top:6px">在真实出版业中，这个取舍每天都在发生 —— 只是决策者不是你一个人，而是一整套制度。</div>';
+  document.getElementById('topicResult').style.display='block';
+});
+document.getElementById('topicReset').addEventListener('click',function(){
+  sel={};document.querySelectorAll('.topic').forEach(function(b){b.classList.remove('sel')});
+  document.getElementById('topicResult').style.display='none';updateSim();
+});
+updateSim();
+
+/* ================= 信息通信：算法解剖 ================= */
+var anaSteps=[
+ {k:'停留',t:'你在这条视频上停了 47 秒',sc:'停留时长 ✓',cls:'up'},
+ {k:'完播',t:'系统记录：完整看完',sc:'完播率 ✓',cls:'up'},
+ {k:'互动',t:'你点了赞，还留了一条评论',sc:'互动信号 ✓ ✓',cls:'up'},
+ {k:'分叉',t:'同一分钟，你划走了另一条 15 分钟的知识视频（只看了 30 秒）',sc:'完播率 ✗',cls:'down'},
+ {k:'结果',t:'那条知识内容得分下降，不再推给"和你相似的人"',sc:'分发收窄 ✗',cls:'down'}];
+var anaIdx=0,anaBox=document.getElementById('anaBox');
+function renderAna(){
+  anaBox.innerHTML='';
+  anaSteps.slice(0,anaIdx).forEach(function(s){
+    var d=document.createElement('div');d.className='ana-row show '+s.cls;
+    d.innerHTML='<span class="k">'+s.k+'</span><span>'+s.t+'</span><span class="sc">'+s.sc+'</span>';
+    anaBox.appendChild(d);
+  });
+  if(anaIdx===0)anaBox.innerHTML='<div class="ana-row show"><span class="k" style="background:rgba(255,255,255,.08);color:var(--muted)">待机</span><span>点击「提交一次浏览」开始解剖你的一次滑动</span></div>';
+  document.getElementById('anaVerdict').classList.toggle('show',anaIdx>=anaSteps.length);
+  document.getElementById('anaBtn').textContent=anaIdx>=anaSteps.length?'已解剖完成 ✓':'提交一次浏览 →';
+  document.getElementById('anaBtn').disabled=anaIdx>=anaSteps.length;
+}
+document.getElementById('anaBtn').addEventListener('click',function(){if(anaIdx<anaSteps.length){anaIdx++;renderAna();}});
+document.getElementById('anaReset').addEventListener('click',function(){anaIdx=0;renderAna();});
+renderAna();
+
+/* ================= 信息通信：调参台 ================= */
+var pool=[
+ {t:'⚡ 明星塌房实锤！评论区吵翻了',click:9,watch:8,div:3,sv:1},
+ {t:'🤯 你绝对想不到的 5 个冷知识',click:7,watch:6,div:4,sv:2},
+ {t:'📊 15分钟看懂量子计算基础',click:3,watch:6,div:8,sv:5},
+ {t:'😭 一只流浪猫的最后一夜',click:8,watch:9,div:4,sv:2},
+ {t:'🔬 疫苗原理硬核科普（无梗无爽点）',click:2,watch:4,div:9,sv:5},
+ {t:'🔥 让你血压升高的社会新闻',click:9,watch:7,div:3,sv:2},
+ {t:'🍜 深夜食堂探店 vlog',click:6,watch:7,div:5,sv:2},
+ {t:'🏛 县域老龄化调查：被忽略的300位老人',click:2,watch:3,div:9,sv:5},
+ {t:'😂 沙雕日常合集：一周爆笑瞬间',click:7,watch:5,div:4,sv:1},
+ {t:'📚 乡村教师口述史：讲完最后一个故事',click:3,watch:4,div:8,sv:5}];
+function genFeed(){
+  var w1=+document.getElementById('w1').value,w2=+document.getElementById('w2').value,w3=+document.getElementById('w3').value;
+  document.getElementById('w1v').textContent=w1;
+  document.getElementById('w2v').textContent=w2;
+  document.getElementById('w3v').textContent=w3;
+  var sum=w1+w2+w3;if(sum===0)sum=1;
+  var scored=pool.map(function(x){return {x:x,s:(w1*x.click+w2*x.watch+w3*x.div)/sum}});
+  scored.sort(function(a,b){return b.s-a.s});
+  var top=scored.slice(0,6),fb=document.getElementById('feed');
+  fb.innerHTML='';
+  top.forEach(function(o,i){
+    var d=document.createElement('div');d.className='fitem';
+    d.innerHTML='<div class="rank">'+(i+1)+'</div><div>'+o.x.t+'</div><div class="sv '+(o.x.sv>=4?'hi':'')+'">★'+o.x.sv+'</div>';
+    fb.appendChild(d);
+  });
+  var avgSv=top.reduce(function(a,b){return a+b.x.sv},0)/top.length;
+  var avgClick=top.reduce(function(a,b){return a+b.x.click},0)/top.length;
+  var kpi=avgClick*4+w2*3;
+  document.getElementById('kpiSv').textContent=avgSv.toFixed(1)+' / 5';
+  document.getElementById('kpiDa').textContent=(kpi*1.9).toFixed(0);
+  document.getElementById('kpiRev').textContent=(kpi*2.6).toFixed(0);
+  var c=document.getElementById('cocoonMsg'),b=document.getElementById('boardMsg');
+  c.classList.toggle('show',w1>=8&&w3<=3&&w2<=5);
+  b.classList.toggle('show',w3>=8&&w1<=2);
+}
+['w1','w2','w3'].forEach(function(id){document.getElementById(id).addEventListener('input',genFeed)});
+document.getElementById('genFeed').addEventListener('click',genFeed);
+genFeed();
+
+/* ================= 新闻与传播：框架切换 ================= */
+var frames=[
+ {h:'《外卖平台被指压榨骑手，双方各执一词》',l:'读者关注：谁对谁错？评论区迅速分裂为两派开始互相指责。',
+  c:[['愤','平台就是资本家，有什么好洗的？'],['理','骑手又没人拿枪逼他干，不愿意可以走'],['愤','何不食肉糜？你下去送一天试试？'],['理','我送过三个月，所以我才说是个人选择'],['围','坐等后续，看看谁被打脸']]},
+ {h:'《凌晨两点的雨里，他还有三单没送》',l:'读者关注：这个人真不容易。问题被成功转化为对个体的同情。',
+  c:[['暖','看哭了，下雨天大家多点耐心吧'],['暖','给骑手哥哥们说声谢谢'],['叹','生活不易，且行且珍惜'],['冷','同情完然后呢？明天他还是要跑 12 小时'],['暖','至少我们学会了体谅']]},
+ {h:'《62% 骑手超时劳动：灵活就业的社保缺口在哪里》',l:'读者关注：制度怎么改？—— 但这类内容往往点开率最低。',
+  c:[['议','应该强制平台按单缴纳工伤保险'],['议','核心是劳动关系认定，平台把雇佣拆成了"合作"'],['法','参考某地已试点的职业伤害保障'],['议','监管成本谁出？平台会转嫁给消费者'],['问','所以普通人能做什么？']]},
+ {h:'《10 小时、62%、半数无社保：一份骑手生存报告》',l:'读者关注：数据背后是什么？—— 客观的表象下，读者容易麻木。',
+  c:[['数','数据来源？样本量多大？置信区间？'],['麻','又是这种报告，年年都差不多'],['数','正因为年年差不多，才说明问题没解决'],['转','转了，希望更多人看到'],['麻','转发的人里，有几个会点开原文？']]}];
+var fIdx=0;
+function renderFrame(){
+  var f=frames[fIdx];
+  document.getElementById('fHead').innerHTML='<span>标题 '+'ABCD'[fIdx]+' · '+['冲突框架','人情框架','制度框架','数字框架'][fIdx]+'</span>'+f.h;
+  document.getElementById('fLead').textContent=f.l;
+  var box=document.getElementById('cmtBox');box.innerHTML='';
+  var colors=['#f472b6','#38bdf8','#f5b942','#4ade80','#a78bfa'];
+  f.c.forEach(function(c,i){
+    var d=document.createElement('div');d.className='cmt';d.style.animationDelay=(i*0.06)+'s';
+    d.innerHTML='<div class="avatar" style="background:'+colors[i%5]+'">'+c[0]+'</div><div class="bub"><div class="who">网友 #'+(i+1)+'</div>'+c[1]+'</div>';
+    box.appendChild(d);
+  });
+  document.querySelectorAll('.ftab').forEach(function(t,i){t.classList.toggle('on',i===fIdx)});
+}
+document.querySelectorAll('.ftab').forEach(function(t){
+  t.addEventListener('click',function(){fIdx=+t.getAttribute('data-f');renderFrame()});
+});
+renderFrame();
+document.querySelectorAll('.pollopt').forEach(function(p){
+  p.addEventListener('click',function(){
+    document.querySelectorAll('.pollopt').forEach(function(x){x.classList.remove('voted')});
+    p.classList.add('voted');
+    document.getElementById('pollNote').style.display='block';
+  });
+});
+
+/* ================= 折叠面板 ================= */
+document.querySelectorAll('.fold>button').forEach(function(b){
+  b.addEventListener('click',function(){b.parentNode.classList.toggle('open')});
+});
+
+/* ================= 汇合：链条展开 ================= */
+document.querySelectorAll('.cbox').forEach(function(b){
+  b.addEventListener('click',function(){b.classList.toggle('open')});
+});
+
+/* ================= 鼠标跟随倾斜 ================= */
+var canTilt=(typeof window.matchMedia==='function')?window.matchMedia('(hover:hover)').matches:false;
+if(canTilt){
+  document.addEventListener('mousemove',function(e){
+    var c=e.target.closest?e.target.closest('.entry,.card,.cbox'):null;
+    document.querySelectorAll('.tilted').forEach(function(el){if(el!==c){el.classList.remove('tilted');el.style.transform=''}});
+    if(!c)return;
+    var r=c.getBoundingClientRect();
+    var px=(e.clientX-r.left)/r.width-0.5,py=(e.clientY-r.top)/r.height-0.5;
+    c.classList.add('tilted');
+    c.style.transform='perspective(900px) rotateY('+(px*5).toFixed(2)+'deg) rotateX('+(-py*5).toFixed(2)+'deg) translateY(-4px)';
+  });
+}
+
+/* ================= 初始化 ================= */
+go(location.hash.slice(1)||'home',true);
+</script>
+</body>
+</html>
