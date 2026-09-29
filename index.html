@@ -244,6 +244,29 @@ h3{font-size:18px;margin:0 0 12px}
 .pollopt.voted .pct{display:block}
 .poll-note{display:none;margin-top:14px;font-size:13.5px;color:#e9b6d3}
 
+/* 出版：推导链步骤导语 */
+.steplead{font-size:13.5px;line-height:1.75;color:#c3cede;background:linear-gradient(90deg,rgba(245,185,66,.10),rgba(245,185,66,.02));
+  border-left:3px solid var(--c1);border-radius:0 10px 10px 0;padding:12px 16px;margin:0 0 16px}
+.steplead b{color:var(--c1)}
+.steplead em{font-style:normal;color:var(--text);font-weight:700}
+
+/* 出版→平台 桥梁对照 */
+.bridgewrap{display:grid;grid-template-columns:1fr 54px 1fr;gap:0;align-items:center;margin-bottom:6px}
+@media(max-width:760px){.bridgewrap{grid-template-columns:1fr;gap:10px}}
+.bcol{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px}
+.bcol-h{font-size:12px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px;text-transform:uppercase}
+.brow{padding:11px 0;border-top:1px dashed var(--line);font-size:15px;font-weight:700;color:var(--text)}
+.brow:first-of-type{border-top:none}
+.brow em{display:block;font-style:normal;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:3px}
+.barw{text-align:center;font-size:26px;color:var(--c2);font-weight:800}
+@media(max-width:760px){.barw{transform:rotate(90deg);padding:2px 0}}
+.bnote{font-size:14px;line-height:1.85;color:#c3cede;margin:18px 0 0}
+.bnote b{color:var(--c1)}
+.bdiff{margin-top:14px;padding:16px 18px;border-radius:12px;background:rgba(56,189,248,.07);border:1px dashed rgba(56,189,248,.35);
+  font-size:13.5px;line-height:1.85;color:#c3cede}
+.bdiff b{color:var(--text)}
+.bdiff .hl{color:var(--c2);font-weight:700}
+
 /* 汇合 */
 .chain{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 @media(max-width:820px){.chain{grid-template-columns:1fr}}
@@ -373,25 +396,10 @@ h3{font-size:18px;margin:0 0 12px}
 
   <div class="sec rise">
     <div class="sec-head">
-      <h3>🎴 选题会上的三次沉默</h3>
-      <em class="hint">👆 点击任意一张卡片，翻开它会后的现场</em>
+      <h3>🎮 ① 你是编辑：选题会模拟器</h3>
+      <em class="hint">规则：<b>3 个书号</b> + <b>120 编辑工时</b>，选满 3 个开会 —— <b>记得试试第 4 个</b></em>
     </div>
-    <div class="flipbox" id="silenceCards"></div>
-  </div>
-
-  <div class="sec rise">
-    <div class="sec-head">
-      <h3>🎴 三道筛子</h3>
-      <em class="hint">👆 一本书走到读者面前，要先通过这三关</em>
-    </div>
-    <div class="flipbox" id="filterCards"></div>
-  </div>
-
-  <div class="sec rise">
-    <div class="sec-head">
-      <h3>🎮 你是编辑：选题会模拟器</h3>
-      <em class="hint">规则：<b>3 个书号</b> + <b>120 编辑工时</b>，选满 3 个开会</em>
-    </div>
+    <p class="steplead"><b>第一步 · 先把约束摆到桌面上。</b>资源有限，所以选择必然发生；选择必然发生，就一定有东西被放弃。要追问的不是"我们选了什么"，而是<em>我们拿什么标准，去放弃另外三个</em>。</p>
     <div class="topics" id="topics"></div>
     <div class="simbar">
       <div>书号 <b id="quotaLeft" style="color:var(--c1)">3</b>/3 　工时 <b id="hoursLeft" style="color:var(--c1)">120</b>/120</div>
@@ -404,6 +412,24 @@ h3{font-size:18px;margin:0 0 12px}
     </div>
   </div>
 
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎴 ② 是什么在卡住我们：三道筛子</h3>
+      <em class="hint">👆 被放弃的从来不是随机三个 —— 一本书走到读者面前，要先过这三关</em>
+    </div>
+    <p class="steplead"><b>第二步 · 追问。</b>这三道筛子，问的都不是<em>"它值不值得存在"</em>，而是<em>"它能不能被生产"</em> —— 前者我们不会算，后者每天都在算。</p>
+    <div class="flipbox" id="filterCards"></div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🎴 ③ 回到那张会议桌：三次沉默</h3>
+      <em class="hint">👆 纸面的标准讲完了，回到现场 —— 看每一次沉默对应哪一道筛子</em>
+    </div>
+    <p class="steplead"><b>第三步 · 印证。</b>请特别留意<b>第二次沉默</b>：「不需要讨论」，往往意味着它已经<em>不需要被论证</em>了。</p>
+    <div class="flipbox" id="silenceCards"></div>
+  </div>
+
   <div class="fold theory rise">
     <button>🔎 马克思主义方法论透视<span class="ar">›</span></button>
     <div class="body">
@@ -413,15 +439,42 @@ h3{font-size:18px;margin:0 0 12px}
     </div>
   </div>
 
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🌉 第四步 · 同一套逻辑：从出版社到平台</h3>
+      <em class="hint">我们讲的都是"一本书" —— 可它和你每天刷的短视频，底层是一件事</em>
+    </div>
+    <div class="bridgewrap">
+      <div class="bcol">
+        <div class="bcol-h">出版社 · 三道筛子</div>
+        <div class="brow">能不能出<em>出版导向 / 政策边界 / 合法性</em></div>
+        <div class="brow">能不能卖<em>销售预测 / 退货率 / 能被购买的需要</em></div>
+        <div class="brow">能不能做<em>书号 / 编辑工时 / 印制成本</em></div>
+      </div>
+      <div class="barw">→</div>
+      <div class="bcol">
+        <div class="bcol-h">内容平台 · 三道关口</div>
+        <div class="brow">过不过得了审核<em>合规红线 / 推荐资格</em></div>
+        <div class="brow">能不能留住你<em>预测点击率 / 停留时长 / 互动率</em></div>
+        <div class="brow">值不值得给流量<em>推荐位 / 曝光预算 / 算力成本</em></div>
+      </div>
+    </div>
+    <p class="bnote">两边面对的是同一个处境：<b>无限的内容供给，撞上有限的通道资源</b>；两边也都用一套<b>自己算得清的指标</b>，替换了那个算不清的东西 —— 这本书、这条视频，<b>对社会究竟有没有价值</b>。</p>
+    <div class="bdiff">
+      但有一处，平台比出版社更彻底。选题会一年开几十次，<span class="hl">每一次都有纪要、有人签字、有人负责</span>；而平台的推荐决策每秒发生上亿次 —— <span class="hl">没有会议、没有纪要，也没有一个签字的人</span>。<br>
+      一本书没出版，你至少知道有过这样一本书；<b>一条内容没被推到你面前，你永远不会知道自己错过了它。</b>
+    </div>
+  </div>
+
   <div class="fold rise">
     <button>⚖️ 本视角的解释边界<span class="ar">›</span></button>
     <div class="body">
-      <p>出版视角解释了"什么内容能进入通道"，但它回答不了：<b>内容被生产出来之后，为什么有的传播开来、有的无人问津？</b></p>
+      <p>出版视角解释了"什么内容能进入通道"，但它回答不了：<b>同样有限的资源、同样被替换掉的价值标准，到底谁更容易通过这道关口、被推到我们眼前？</b></p>
     </div>
   </div>
 
   <div class="nextbar">
-    <span class="hint">内容离开出版社之后发生的事情，需要下一双眼睛。</span>
+    <span class="hint">同一套逻辑，换到人人都用的平台上，会变成什么样？</span>
     <button class="btn" data-go="ict">📡 进入信息通信 →</button>
   </div>
 </section>
