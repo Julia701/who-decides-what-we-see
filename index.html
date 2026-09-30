@@ -63,6 +63,29 @@ header{position:sticky;top:0;z-index:60;background:rgba(11,15,22,.88);backdrop-f
 .theory3 .mini h5{color:var(--c1)}
 .vsh{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
 
+/* 马克思主义方法论解读 · 三段式理论卡 */
+.lens{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.lens .lcard{position:relative;background:linear-gradient(180deg,var(--panel2),rgba(20,26,36,.92));border:1px solid var(--line);border-left:3px solid var(--c3);border-radius:14px;padding:17px 20px 16px;transition:.25s}
+.lens .lcard:hover{border-left-color:var(--c1);box-shadow:0 8px 26px rgba(0,0,0,.28)}
+.lens .ltop{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.lens .lnum{width:22px;height:22px;flex:none;border-radius:7px;background:rgba(244,114,182,.16);border:1px solid rgba(244,114,182,.45);color:var(--c3);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.lens .ltag{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.lens h5{font-size:15.5px;font-weight:800;line-height:1.5;margin:10px 0 0}
+.lens h5 em{font-style:normal;color:var(--muted);font-weight:700;font-size:12.5px;margin-left:7px;white-space:nowrap}
+.lens p.tx{margin-top:11px;font-size:13.5px;line-height:1.9;color:#aebbcb}
+.lens p.tx b{color:var(--c3);font-weight:700}
+.lens .hook{margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.75;color:var(--muted)}
+.lens .hook b{color:#f6c6da}
+@media(max-width:820px){.lens h5{font-size:14.5px}.lens h5 em{display:block;margin:4px 0 0;white-space:normal}}
+
+/* 总结 · 怎么避免陷入框架陷阱 */
+.avoid{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.avoid .ax{display:flex;gap:14px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:15px 18px;transition:.25s}
+.avoid .ax:hover{border-color:rgba(245,185,66,.55);transform:translateX(4px)}
+.avoid .an{width:26px;height:26px;flex:none;border-radius:50%;background:rgba(245,185,66,.15);border:1px solid rgba(245,185,66,.45);color:var(--c1);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.avoid .at{font-size:13.5px;line-height:1.8;color:#c3cedb}
+.avoid .at b{color:var(--c1);font-weight:800}
+
 .prog{height:2px;background:var(--line)}
 .prog i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));transition:width .45s ease}
 
@@ -603,16 +626,17 @@ h3{font-size:18px;margin:0 0 12px}
     <div class="tabs2">
       <button class="ftab on" data-f="0">选择框架</button>
       <button class="ftab" data-f="1">冲突框架</button>
-      <button class="ftab" data-f="2">制度框架</button>
-      <button class="ftab" data-f="3">数据框架</button>
+      <button class="ftab" data-f="2">人情故事框架</button>
+      <button class="ftab" data-f="3">制度框架</button>
+      <button class="ftab" data-f="4">数据框架</button>
     </div>
     <div class="framegrid">
       <div class="card fact">
         <p class="base">【事实底稿 · 不变】深圳骑手调研 1288 份问卷：40.14% 愿缴社保，38.78% 因担心收入减少不愿缴纳，58.84% 日工作超 8 小时。</p>
         <h4 id="fHead"><span>标题 A · 选择框架</span>《仅四成骑手愿缴社保：他们为什么说不？》</h4>
         <p class="flavor" id="fLead">读者关注：骑手自己怎么想？</p>
-        <p class="hint" style="margin-top:16px">四个标题都没有篡改事实，但它们让你看向了四个不同的方向 —— <b>并且，都不完整。</b></p>
-        <p class="note">标题为教学改写，评论为模拟；四项是呈现入口，并非固定的理论分类。</p>
+        <p class="hint" style="margin-top:16px">五个标题都没有篡改事实，但它们让你看向了五个不同的方向 —— <b>并且，都不完整。</b></p>
+        <p class="note">标题为教学改写，评论为模拟；五项是呈现入口，并非固定的理论分类。</p>
       </div>
       <div class="comments">
         <div class="cht">— 评论区 —</div>
@@ -671,21 +695,40 @@ h3{font-size:18px;margin:0 0 12px}
 
   <div class="sec rise">
     <div class="sec-head">
-      <h3>🔎 理论透镜：马克思主义方法论</h3>
+      <h3>🔎 新闻框架的马克思主义方法论解读</h3>
+      <em class="hint">三个追问，把「框架」放回社会存在与生产关系里看</em>
     </div>
-    <div class="g3 theory3">
-      <div class="mini">
-        <h5>意识形态的日常化</h5>
-        <p>「保障靠个人选择」，是否被当成了无需解释的前提？</p>
+    <div class="lens">
+      <div class="lcard">
+        <div class="ltop"><span class="lnum">1</span><span class="ltag">认知机制 · 历史唯物主义</span></div>
+        <h5>为什么新闻框架会影响受众？<em>—— 框架如何影响认知</em></h5>
+        <p class="tx">历史唯物主义指出，<b>社会存在决定社会意识</b>。意识不是对客观现实的镜面直观复制，而是能动的反映，人的认识要经过中介环节才能完成。新闻事件本身属于客观的社会存在，而受众几乎不可能直接亲历事件现场，只能经由新闻报道这一中介来把握事实。新闻框架本质上是一种<b>观念上层建筑层面的意识加工方式</b>，不同框架输出不同的意识材料，受众接收到的「事件图景」就发生改变。</p>
+        <div class="hook">→ 落到本例：同一份 1288 份问卷，写成「他们为什么说不」，读者拿到的「事件图景」就变成了<b>一个个人选择问题</b>。</div>
       </div>
-      <div class="mini">
-        <h5>受众的能动性</h5>
-        <p>读者可以越过标题，补充背景、质疑归因。</p>
+      <div class="lcard">
+        <div class="ltop"><span class="lnum">2</span><span class="ltag">主体能动性 · 客观规律与主体选择的统一</span></div>
+        <h5>用户在框架中是被动的吗？<em>—— 受众如何发挥能动性</em></h5>
+        <p class="tx">社会历史过程是<b>客观规律性和主体选择性的统一</b>。新闻框架为受众提供认知环境，但受众不是消极接受信息的容器，受众作为现实的人，拥有主体能动性，会基于自身实践经验、社会关系对新闻文本进行再解读。</p>
+        <div class="hook">→ 落到本例：读者可以点开原报道、翻到正文里「收入压力、用工关系与算法管理」那一段，<b>越过标题给出的解释</b>。</div>
       </div>
-      <div class="mini">
-        <h5>传播即权力</h5>
-        <p>谁有机会定义问题，也就在参与界定改变的责任。</p>
+      <div class="lcard">
+        <div class="ltop"><span class="lnum">3</span><span class="ltag">立场分析 · 社会认知与价值中立</span></div>
+        <h5>谁在决定新闻报道的框架？<em>—— 报道体现谁的立场</em></h5>
+        <p class="tx">马克思主义社会科学方法论提出，社会认知区别于自然认知，社会领域很难做到<b>绝对价值中立</b>，认知活动总是和主体的利益、立场相关联。新闻框架本质就是<b>叙事主体立场、利益、价值的外化</b>。新闻生产主体处在一定社会关系之中，新闻框架的选择不是纯粹技术问题，背后反映报道主体关注什么、忽略什么，代表着一定群体的利益关切。</p>
+        <div class="hook">→ 落到本例：标题突出<b>选择的结果</b>，正文补充<b>选择的条件</b> —— 两种加工背后，是不同的关切与立场。</div>
       </div>
+    </div>
+  </div>
+
+  <div class="sec rise">
+    <div class="sec-head">
+      <h3>🧭 总结：怎么避免陷入框架陷阱？</h3>
+      <em class="hint">三条方法论的自我要求</em>
+    </div>
+    <div class="avoid">
+      <div class="ax"><span class="an">1</span><div class="at">自觉运用<b>唯物辩证法</b>，拒绝被单一叙事框架裹挟。</div></div>
+      <div class="ax"><span class="an">2</span><div class="at">坚持<b>整体性思维</b>，追问报道省略了哪些信息，把事件放回具体社会历史条件中考察。</div></div>
+      <div class="ax"><span class="an">3</span><div class="at">坚持<b>实践标准</b>，不把媒体叙事直接等同于客观现实，要区分个别现象和整体本质，实现社会认知与社会评价的辩证统一。</div></div>
     </div>
   </div>
 
@@ -1007,6 +1050,8 @@ var frames=[
   c:[['择','自己算过账，到手现金更重要'],['择','还年轻，等老了再说吧'],['疑','说自愿，可不缴就没得选吧'],['议','短视，社保是长远保障'],['冷','说到底还是收入太低'],['问','他们算过老了以后怎么办吗']]},
  {h:'《缴不起的社保：骑手与平台之间的这笔账，怎么算？》',l:'读者关注：谁对谁错？—— 但讨论容易滑向站队。',
   c:[['怒','平台用一纸合作把雇佣关系拆掉了'],['怼','自己选的，没人拿刀逼他'],['怒','不跑就没收入，这也叫自愿？'],['怼','那去干别的啊'],['叹','吵来吵去，问题还是没解决'],['议','两边都有理，但规则是谁定的']]},
+ {h:'《一天奔波超 8 小时，得不到社会保障的外卖骑手该何去何从？》',l:'读者关注：他们的生活有多难？—— 个体处境唤起共鸣，但讨论容易停在「大家都不容易」。',
+  c:[['暖','别说外卖骑手了，我也天天加班，看完感觉说的就是自己。'],['暖','每天和外卖骑手一样累，公司也没给我交五险一金。'],['叹','看着有点想哭，谁不是这样熬过来的'],['问','可为什么大家都这么难？这句话一说，具体的问题就没人问了'],['冷','感动完了呢？明天他还是得跑 8 小时'],['议','我爸妈那辈还有个「单位」，他们连单位都没有']]},
  {h:'《当自愿成为唯一选项：骑手社保的制度性困境》',l:'读者关注：制度怎么改？—— 但这类标题往往点开率最低。',
   c:[['议','关键是劳动关系认定，不是意愿调查'],['议','应该按单缴纳职业伤害保障'],['法','参考某地已经试点的做法'],['问','缴费怎么分摊？平台会转嫁吗'],['议','算法考核不改，跑得慢就赚不到钱'],['转','转了，希望推动讨论']]},
  {h:'《1288 份问卷：58.84% 的骑手每天工作超过 8 小时》',l:'读者关注：数据背后是什么？—— 但数字容易让人麻木。',
@@ -1014,7 +1059,7 @@ var frames=[
 var fIdx=0;
 function renderFrame(){
   var f=frames[fIdx];
-  document.getElementById('fHead').innerHTML='<span>标题 '+'ABCD'[fIdx]+' · '+['选择框架','冲突框架','制度框架','数字框架'][fIdx]+'</span>'+f.h;
+  document.getElementById('fHead').innerHTML='<span>标题 '+'ABCDE'[fIdx]+' · '+['选择框架','冲突框架','人情故事框架','制度框架','数据框架'][fIdx]+'</span>'+f.h;
   document.getElementById('fLead').textContent=f.l;
   var box=document.getElementById('cmtBox');box.innerHTML='';
   var colors=['#f472b6','#38bdf8','#f5b942','#4ade80','#a78bfa'];
